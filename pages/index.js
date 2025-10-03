@@ -7,37 +7,101 @@ import Footer from "../components/Footer";
 export default function Home() {
   const [photos, setPhotos] = useState([]);
   const [modalPhoto, setModalPhoto] = useState(null);
+  const [admin, setAdmin] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+
+  const ADMIN_PASSWORD = "casamento123"; // coloque sua senha aqui
 
   useEffect(() => {
     const fetchPhotos = async () => {
       const q = query(collection(db, "fotos"), orderBy("createdAt", "desc"));
       const snapshot = await getDocs(q);
-      const list = snapshot.docs.map(doc => doc.data());
+      const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setPhotos(list);
     };
     fetchPhotos();
   }, []);
 
+  const handleDelete = async (id) => {
+    if (!confirm("Deseja realmente apagar esta foto?")) return;
+    try {
+      await db.collection("fotos").doc(id).delete(); // Ajuste conforme Firestore
+      setPhotos(photos.filter(photo => photo.id !== id));
+      alert("Foto apagada!");
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao apagar a foto.");
+    }
+  };
+
   return (
     <>
       <Header />
+
       <div className="container">
         <h2>Galeria de Fotos</h2>
-        {photos.length === 0 && <p>Nenhuma foto enviada ainda!</p>}
-        <div className="gallery">
-          {photos.map((photo, index) => (
-            <img
-              key={index}
-              src={photo.base64}
-              alt="Foto do casamento"
-              onClick={() => setModalPhoto(photo.base64)}
-              style={{ cursor: "pointer" }}
+
+        {!admin && (
+          <div style={{ marginBottom: "20px" }}>
+            <input
+              type="password"
+              placeholder="Senha do admin"
+              value={passwordInput}
+              onChange={(e) => setPasswordInput(e.target.value)}
+              style={{ padding: "8px", marginRight: "10px" }}
             />
+            <button
+              className="button button-green"
+              onClick={() => {
+                if (passwordInput === ADMIN_PASSWORD) {
+                  setAdmin(true);
+                  setPasswordInput("");
+                } else {
+                  alert("Senha incorreta!");
+                }
+              }}
+            >
+              Entrar
+            </button>
+          </div>
+        )}
+
+        {photos.length === 0 && <p>Nenhuma foto enviada ainda!</p>}
+
+        <div className="gallery">
+          {photos.map((photo) => (
+            <div key={photo.id} style={{ position: "relative" }}>
+              <img
+                src={photo.base64}
+                alt="Foto do casamento"
+                onClick={() => setModalPhoto(photo.base64)}
+                style={{ cursor: "pointer" }}
+              />
+              {admin && (
+                <button
+                  style={{
+                    position: "absolute",
+                    top: "5px",
+                    right: "5px",
+                    backgroundColor: "#ff4444",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "6px",
+                    padding: "4px 8px",
+                    cursor: "pointer",
+                    fontSize: "0.8rem",
+                  }}
+                  onClick={() => handleDelete(photo.id)}
+                >
+                  Apagar
+                </button>
+              )}
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Modal para mostrar foto grande */}
       {modalPhoto && (
         <div
           style={{
@@ -66,5 +130,5 @@ export default function Home() {
 
       <Footer />
     </>
-  )
+  );
 }
