@@ -1,16 +1,13 @@
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
-import { collection, query, orderBy, getDocs } from "firebase/firestore";
+import { collection, query, orderBy, getDocs, doc, deleteDoc } from "firebase/firestore";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { doc, deleteDoc } from "firebase/firestore";
-
 
 export default function Home() {
   const [photos, setPhotos] = useState([]);
   const [modalPhoto, setModalPhoto] = useState(null);
   const [admin, setAdmin] = useState(false);
-  const [passwordInput, setPasswordInput] = useState("");
 
   const ADMIN_PASSWORD = "casamento123"; // coloque sua senha aqui
 
@@ -24,52 +21,46 @@ export default function Home() {
     fetchPhotos();
   }, []);
 
-const handleDelete = async (id) => {
-  if (!confirm("Deseja realmente apagar esta foto?")) return;
-  try {
-    const photoRef = doc(db, "fotos", id);  // cria referência para o documento
-    await deleteDoc(photoRef);              // deleta do Firestore
-    setPhotos(photos.filter(photo => photo.id !== id)); // atualiza o estado
-    alert("Foto apagada!");
-  } catch (err) {
-    console.error(err);
-    alert("Erro ao apagar a foto.");
-  }
-};
-
+  const handleDelete = async (id) => {
+    if (!confirm("Deseja realmente apagar esta foto?")) return;
+    try {
+      const photoRef = doc(db, "fotos", id);
+      await deleteDoc(photoRef);
+      setPhotos(photos.filter(photo => photo.id !== id));
+      alert("Foto apagada!");
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao apagar a foto.");
+    }
+  };
 
   return (
     <>
       <Header />
 
+      {/* Clique secreto para admin */}
+      {!admin && (
+        <div
+          style={{
+            position: "fixed",
+            top: "10px",
+            right: "10px",
+            width: "20px",
+            height: "20px",
+            cursor: "pointer",
+            opacity: 0.2, // quase invisível
+            zIndex: 1001,
+          }}
+          onClick={() => {
+            const password = prompt("Senha do admin:");
+            if(password === ADMIN_PASSWORD) setAdmin(true);
+            else alert("Senha incorreta!");
+          }}
+        ></div>
+      )}
+
       <div className="container">
         <h2>Galeria de Fotos</h2>
-
-        {!admin && (
-          <div style={{ marginBottom: "20px" }}>
-            <input
-              type="password"
-              placeholder="Senha do admin"
-              value={passwordInput}
-              onChange={(e) => setPasswordInput(e.target.value)}
-              style={{ padding: "8px", marginRight: "10px" }}
-            />
-            <button
-              className="button button-green"
-              onClick={() => {
-                if (passwordInput === ADMIN_PASSWORD) {
-                  setAdmin(true);
-                  setPasswordInput("");
-                } else {
-                  alert("Senha incorreta!");
-                }
-              }}
-            >
-              Entrar
-            </button>
-          </div>
-        )}
-
         {photos.length === 0 && <p>Nenhuma foto enviada ainda!</p>}
 
         <div className="gallery">
