@@ -1,11 +1,10 @@
-// pages/upload.js
 import { useState } from "react";
 import { db } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
-// Função para redimensionar imagens grandes
+// Redimensiona imagens grandes
 const resizeImage = (file, maxWidth = 1024, maxHeight = 1024) => {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -15,19 +14,11 @@ const resizeImage = (file, maxWidth = 1024, maxHeight = 1024) => {
       img.onload = () => {
         let width = img.width;
         let height = img.height;
-
         if (width > height) {
-          if (width > maxWidth) {
-            height *= maxWidth / width;
-            width = maxWidth;
-          }
+          if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
         } else {
-          if (height > maxHeight) {
-            width *= maxHeight / height;
-            height = maxHeight;
-          }
+          if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; }
         }
-
         const canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
@@ -50,10 +41,7 @@ export default function Upload() {
     setLoading(true);
     try {
       const base64 = await resizeImage(file);
-      await addDoc(collection(db, "fotos"), {
-        base64,
-        createdAt: serverTimestamp()
-      });
+      await addDoc(collection(db, "fotos"), { base64, createdAt: serverTimestamp() });
       alert("Foto enviada com sucesso!");
       setFile(null);
     } catch (err) {
@@ -70,7 +58,6 @@ export default function Upload() {
         <h2>Envie sua Foto</h2>
 
         <div style={{ display: "flex", justifyContent: "center", gap: "10px", flexWrap: "wrap" }}>
-          {/* Botão Tirar Foto */}
           <label className="button button-blue">
             Tirar Foto
             <input
@@ -82,7 +69,6 @@ export default function Upload() {
             />
           </label>
 
-          {/* Botão Escolher Foto */}
           <label className="button button-gray">
             Escolher Foto
             <input

@@ -51,7 +51,6 @@ h1, h2 {
   margin-top: 15px;
 }
 
-/* Galeria de fotos */
 .gallery {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -65,7 +64,6 @@ h1, h2 {
   object-fit: cover;
 }
 
-/* Header e Footer */
 header, footer {
   text-align: center;
   padding: 20px;
@@ -77,4 +75,16 @@ footer {
   border-top: 1px solid #f5c2e7;
   border-bottom: none;
   margin-top: 40px;
+}
+
+nav a {
+  margin: 0 10px;
+  text-decoration: none;
+  font-weight: bold;
+  color: #d63384;
+  transition: 0.3s;
+}
+
+nav a:hover {
+  color: #0d6efd;
 }
