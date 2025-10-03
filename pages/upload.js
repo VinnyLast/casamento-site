@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { db } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 // Função para redimensionar imagens grandes
 const resizeImage = (file, maxWidth = 1024, maxHeight = 1024) => {
@@ -31,7 +33,7 @@ const resizeImage = (file, maxWidth = 1024, maxHeight = 1024) => {
         canvas.height = height;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, width, height);
-        const base64 = canvas.toDataURL("image/jpeg", 0.7); // comprime para JPEG
+        const base64 = canvas.toDataURL("image/jpeg", 0.7);
         resolve(base64);
       };
     };
@@ -45,71 +47,64 @@ export default function Upload() {
 
   const handleUpload = async () => {
     if (!file) return alert("Escolha um arquivo primeiro!");
-    
     setLoading(true);
     try {
       const base64 = await resizeImage(file);
-      console.log("Base64 tamanho:", base64.length);
-
       await addDoc(collection(db, "fotos"), {
         base64,
         createdAt: serverTimestamp()
       });
-
       alert("Foto enviada com sucesso!");
       setFile(null);
     } catch (err) {
       console.error("Erro ao enviar a foto:", err);
-      alert("Erro ao enviar a foto. Veja o console para detalhes.");
+      alert("Erro ao enviar a foto.");
     }
     setLoading(false);
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Upload de Foto</h1>
+    <>
+      <Header />
+      <div className="container">
+        <h2>Envie sua Foto</h2>
 
-      {/* Botão estilizado */}
-      <label
-        style={{
-          display: "inline-block",
-          padding: "10px 20px",
-          backgroundColor: "#0d6efd",
-          color: "#fff",
-          borderRadius: "8px",
-          cursor: "pointer",
-          marginBottom: "10px"
-        }}
-      >
-        Tirar Foto ou Escolher Arquivo
-        <input
-          type="file"
-          accept="image/*"
-          capture="environment"
-          style={{ display: "none" }}
-          onChange={(e) => setFile(e.target.files[0])}
-        />
-      </label>
+        <div style={{ display: "flex", justifyContent: "center", gap: "10px", flexWrap: "wrap" }}>
+          {/* Botão Tirar Foto */}
+          <label className="button button-blue">
+            Tirar Foto
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              style={{ display: "none" }}
+              onChange={(e) => setFile(e.target.files[0])}
+            />
+          </label>
 
-      {/* Mostrar o nome do arquivo selecionado */}
-      {file && <p>Arquivo selecionado: {file.name}</p>}
+          {/* Botão Escolher Foto */}
+          <label className="button button-gray">
+            Escolher Foto
+            <input
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={(e) => setFile(e.target.files[0])}
+            />
+          </label>
+        </div>
 
-      <button
-        onClick={handleUpload}
-        disabled={loading || !file}
-        style={{
-          display: "block",
-          marginTop: "10px",
-          padding: "10px 20px",
-          backgroundColor: "#198754",
-          color: "#fff",
-          borderRadius: "8px",
-          cursor: loading || !file ? "not-allowed" : "pointer",
-          border: "none"
-        }}
-      >
-        {loading ? "Enviando..." : "Enviar Foto"}
-      </button>
-    </div>
+        {file && <p className="file-name">📄 {file.name}</p>}
+
+        <button
+          onClick={handleUpload}
+          disabled={loading || !file}
+          className="button button-green"
+        >
+          {loading ? "Enviando..." : "Enviar Foto"}
+        </button>
+      </div>
+      <Footer />
+    </>
   );
 }
