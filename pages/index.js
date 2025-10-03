@@ -3,6 +3,8 @@ import { db } from "../firebase";
 import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { doc, deleteDoc } from "firebase/firestore";
+
 
 export default function Home() {
   const [photos, setPhotos] = useState([]);
@@ -22,17 +24,19 @@ export default function Home() {
     fetchPhotos();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (!confirm("Deseja realmente apagar esta foto?")) return;
-    try {
-      await db.collection("fotos").doc(id).delete(); // Ajuste conforme Firestore
-      setPhotos(photos.filter(photo => photo.id !== id));
-      alert("Foto apagada!");
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao apagar a foto.");
-    }
-  };
+const handleDelete = async (id) => {
+  if (!confirm("Deseja realmente apagar esta foto?")) return;
+  try {
+    const photoRef = doc(db, "fotos", id);  // cria referência para o documento
+    await deleteDoc(photoRef);              // deleta do Firestore
+    setPhotos(photos.filter(photo => photo.id !== id)); // atualiza o estado
+    alert("Foto apagada!");
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao apagar a foto.");
+  }
+};
+
 
   return (
     <>
