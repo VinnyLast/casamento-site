@@ -68,14 +68,47 @@ export default function Upload() {
   return (
     <div style={{ padding: "20px" }}>
       <h1>Upload de Foto</h1>
-      <input
-        type="file"
-        accept="image/*"
-        capture="environment" // permite usar a câmera do celular
-        onChange={(e) => setFile(e.target.files[0])}
-      />
-      <button onClick={handleUpload} disabled={loading}>
-        {loading ? "Enviando..." : "Enviar"}
+
+      {/* Botão estilizado */}
+      <label
+        style={{
+          display: "inline-block",
+          padding: "10px 20px",
+          backgroundColor: "#0d6efd",
+          color: "#fff",
+          borderRadius: "8px",
+          cursor: "pointer",
+          marginBottom: "10px"
+        }}
+      >
+        Tirar Foto ou Escolher Arquivo
+        <input
+          type="file"
+          accept="image/*"
+          capture="environment"
+          style={{ display: "none" }}
+          onChange={(e) => setFile(e.target.files[0])}
+        />
+      </label>
+
+      {/* Mostrar o nome do arquivo selecionado */}
+      {file && <p>Arquivo selecionado: {file.name}</p>}
+
+      <button
+        onClick={handleUpload}
+        disabled={loading || !file}
+        style={{
+          display: "block",
+          marginTop: "10px",
+          padding: "10px 20px",
+          backgroundColor: "#198754",
+          color: "#fff",
+          borderRadius: "8px",
+          cursor: loading || !file ? "not-allowed" : "pointer",
+          border: "none"
+        }}
+      >
+        {loading ? "Enviando..." : "Enviar Foto"}
       </button>
     </div>
   );
