@@ -117,6 +117,10 @@ header p {
   font-size: 1.1rem;
   color: #555;
 }
+header h1, .container h2 {
+  font-family: 'Dancing Script', cursive;
+}
+
 header h1 {
   font-size: 3rem;
   color: #ff00aa; /* fúcsia */
