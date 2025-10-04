@@ -1,5 +1,5 @@
 import Image from "next/image";
-import monograma from "../public/IMG_9300.JPG";
+import monograma from "../imagens/IMG_9300.JPG";
 
 export default function Header() {
   return (
