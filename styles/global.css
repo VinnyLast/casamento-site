@@ -153,3 +153,11 @@ nav a:hover {
   box-shadow: 0 8px 20px rgba(0,0,0,0.5);
   cursor: pointer;
 }
+.monograma {
+  margin-bottom: 10px;
+}
+
+.monograma img {
+  max-width: 150px;
+  height: auto;
+}

@@ -1,14 +1,18 @@
-import Link from "next/link";
+import Image from "next/image";
+import monograma from "../public/IMG_9300.JPG";
 
 export default function Header() {
   return (
     <header>
-      <h1>💍 Casamento João & Ana Paula</h1>
-      <p>Envie suas fotos e compartilhe o momento!</p>
-      <nav>
-        <Link href="/">Galeria</Link>
-        <Link href="/upload">Enviar Foto</Link>
-      </nav>
+      <div className="monograma">
+        <Image 
+          src={monograma} 
+          alt="Monograma João & Ana Paula" 
+          width={150} 
+          height={150} 
+        />
+      </div>
+      <h1>Casamento João & Ana Paula</h1>
     </header>
-  )
+  );
 }
