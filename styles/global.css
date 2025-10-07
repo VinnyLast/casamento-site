@@ -1,0 +1,163 @@
+/* styles/global.css */
+
+/* Importar fonte manuscrita do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #fff8f0;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+.container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: #fff8f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+h1, h2 {
+  font-family: 'Dancing Script', cursive;
+}
+
+header h1 {
+  font-size: 3rem;
+  color: #000; /* preto */
+  margin-bottom: 5px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+header p {
+  font-size: 1.1rem;
+  color: #555;
+}
+
+h2 {
+  font-size: 2rem;
+  color: #000;
+  margin-bottom: 20px;
+}
+
+nav a {
+  margin: 0 10px;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background-color: #ff00aa; /* fúcsia */
+  color: #fff;
+  transition: 0.3s;
+}
+
+nav a:hover {
+  background-color: #e60099; /* fúcsia mais escuro */
+  color: #fff;
+}
+
+.button {
+  display: inline-block;
+  padding: 10px 20px;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+  text-align: center;
+  flex: 1 1 120px;
+  max-width: 180px;
+  border: none;
+  margin: 5px;
+}
+
+.button-blue { background-color: #0d6efd; }
+.button-gray { background-color: #6c757d; }
+.button-green { background-color: #198754; }
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.file-name {
+  margin-top: 15px;
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.gallery img {
+  width: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.gallery img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+header, footer {
+  text-align: center;
+  padding: 20px;
+  background-color: #ffe6f0;
+  border-bottom: 1px solid #f5c2e7;
+}
+
+footer {
+  border-top: 1px solid #f5c2e7;
+  border-bottom: none;
+  margin-top: 40px;
+}
+
+nav a {
+  margin: 0 10px;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background-color: #ff00aa;
+  color: #fff;
+  transition: 0.3s;
+}
+
+nav a:hover {
+  background-color: #e60099;
+  color: #fff;
+}
+
+/* Modal Lightbox */
+.modal-photo {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-photo img {
+  max-height: 90%;
+  max-width: 90%;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  cursor: pointer;
+}
+.monograma {
+  margin-bottom: 10px;
+}
+
+.monograma img {
+  max-width: 150px;
+  height: auto;
+}
