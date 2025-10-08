@@ -41,6 +41,7 @@ export default function Home() {
     "Foto da decoração"
   ];
 
+  // Função para buscar fotos
   const fetchPhotos = async (loadMore = false) => {
     setLoading(true);
     let q;
@@ -97,18 +98,22 @@ export default function Home() {
     }
   };
 
-  const openModal = (photo, bingoName) => {
+  const openModal = (photo, bingoName = "") => {
     setModalPhoto(photo.base64);
     setModalNome(photo.nome);
     setModalComentario(photo.comentario || "");
     setModalBingo(bingoName);
   };
 
+  // Agrupa fotos por convidado
   const groupedPhotos = photos.reduce((acc, photo) => {
     if (!acc[photo.nome]) acc[photo.nome] = [];
     acc[photo.nome].push(photo);
     return acc;
   }, {});
+
+  // Fotos sem categoria
+  const loosePhotos = photos.filter(photo => !photo.bingo);
 
   return (
     <>
@@ -140,65 +145,72 @@ export default function Home() {
 
         {Object.keys(groupedPhotos).map((nome) => {
           const userPhotos = groupedPhotos[nome];
+
           return (
             <div key={nome} style={{ marginBottom: "40px" }}>
               <h3 style={{ textAlign: "left", marginBottom: "10px" }}>{nome}</h3>
-              
-              <div className="bingo-grid" style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(6, 1fr)",
-                gap: "10px",
-                marginBottom: "10px"
-              }}>
-                {bingoItems.slice(0,6).map((item, idx) => {
-                  const photo = userPhotos.find(p => p.bingo === item);
-                  return (
-                    <div key={idx} style={{
-                      height: "120px",
-                      border: "2px dashed #ccc",
-                      borderRadius: "8px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: photo ? "#f0f0f0" : "#fff",
-                      cursor: photo ? "pointer" : "default"
-                    }}
-                    onClick={() => photo && openModal(photo, item)}
-                    >
-                      {!photo && <span style={{ textAlign: "center", fontSize: "0.9rem" }}>{item}</span>}
-                    </div>
-                  )
-                })}
-              </div>
 
-              <div className="bingo-grid" style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(6, 1fr)",
-                gap: "10px"
-              }}>
-                {bingoItems.slice(6,12).map((item, idx) => {
+              <div className="bingo-grid">
+                {bingoItems.map((item, idx) => {
                   const photo = userPhotos.find(p => p.bingo === item);
                   return (
-                    <div key={idx} style={{
-                      height: "120px",
-                      border: "2px dashed #ccc",
-                      borderRadius: "8px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: photo ? "#f0f0f0" : "#fff",
-                      cursor: photo ? "pointer" : "default"
-                    }}
-                    onClick={() => photo && openModal(photo, item)}
+                    <div
+                      key={idx}
+                      className="bingo-item"
+                      style={{
+                        cursor: photo ? "pointer" : "default"
+                      }}
+                      onClick={() => photo && openModal(photo, item)}
                     >
-                      {!photo && <span style={{ textAlign: "center", fontSize: "0.9rem" }}>{item}</span>}
+                      {photo ? (
+                        <img src={photo.base64} alt={`Foto de ${nome}`} />
+                      ) : (
+                        <span>{item}</span>
+                      )}
                     </div>
-                  )
+                  );
                 })}
               </div>
             </div>
           )
         })}
+
+        {loosePhotos.length > 0 && (
+          <>
+            <h2>Fotos Livres</h2>
+            <div className="gallery">
+              {loosePhotos.map(photo => (
+                <div key={photo.id}>
+                  <img
+                    src={photo.base64}
+                    alt={`Foto de ${photo.nome}`}
+                    onClick={() => openModal(photo)}
+                    loading="lazy"
+                  />
+                  {admin && (
+                    <button
+                      style={{
+                        position: "absolute",
+                        top: "5px",
+                        right: "5px",
+                        backgroundColor: "#ff4444",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "6px",
+                        padding: "4px 8px",
+                        cursor: "pointer",
+                        fontSize: "0.8rem",
+                      }}
+                      onClick={() => handleDelete(photo.id)}
+                    >
+                      Apagar
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
         {loading && <p>Carregando fotos...</p>}
       </div>
@@ -229,7 +241,7 @@ export default function Home() {
             }}
           />
           <p style={{ marginTop: "10px", fontSize: "1.1rem" }}>
-            <strong>{modalNome}</strong> - {modalBingo}
+            <strong>{modalNome}</strong> {modalBingo && `- ${modalBingo}`}
           </p>
           {modalComentario && <p style={{ fontStyle: "italic" }}>{modalComentario}</p>}
         </div>

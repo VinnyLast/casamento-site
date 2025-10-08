@@ -57,7 +57,6 @@ export default function Upload() {
   const handleUpload = async () => {
     if (!file) return alert("Escolha um arquivo primeiro!");
     if (!nome) return alert("Digite seu nome!");
-    if (!categoria) return alert("Selecione a categoria do bingo!");
 
     setLoading(true);
     try {
@@ -67,7 +66,7 @@ export default function Upload() {
         createdAt: serverTimestamp(),
         nome,
         comentario,
-        categoria
+        bingo: categoria || null // categoria opcional
       });
       alert("Foto enviada com sucesso!");
       setFile(null);
@@ -100,7 +99,7 @@ export default function Upload() {
           onChange={(e) => setCategoria(e.target.value)}
           style={{ marginBottom: "10px", padding: "8px", width: "100%", borderRadius: "6px", border: "1px solid #ccc" }}
         >
-          <option value="">Selecione a categoria do bingo</option>
+          <option value="">Sem categoria (foto livre)</option>
           {bingoCategorias.map((cat) => (
             <option key={cat} value={cat}>{cat}</option>
           ))}
