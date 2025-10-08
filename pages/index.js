@@ -8,8 +8,7 @@ import {
   doc,
   deleteDoc,
   limit,
-  startAfter,
-  where
+  startAfter
 } from "firebase/firestore";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -25,7 +24,6 @@ export default function Home() {
   const [admin, setAdmin] = useState(false);
   const PHOTOS_PER_PAGE = 50;
   const ADMIN_PASSWORD = "casamento123";
-
   const containerRef = useRef();
 
   const bingoItems = [
@@ -99,22 +97,6 @@ export default function Home() {
     }
   };
 
-  const handleDeleteGroup = async (nome) => {
-    if (!confirm(`Deseja realmente apagar todas as fotos do grupo ${nome}?`)) return;
-    try {
-      const groupPhotos = photos.filter(photo => photo.nome === nome);
-      for (let p of groupPhotos) {
-        const photoRef = doc(db, "fotos", p.id);
-        await deleteDoc(photoRef);
-      }
-      setPhotos(photos.filter(photo => photo.nome !== nome));
-      alert(`Grupo ${nome} apagado!`);
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao apagar o grupo.");
-    }
-  };
-
   const openModal = (photo, bingoName) => {
     setModalPhoto(photo.base64);
     setModalNome(photo.nome);
@@ -122,7 +104,7 @@ export default function Home() {
     setModalBingo(bingoName);
   };
 
-  // Agrupa fotos por convidado apenas para o bingo
+  // Agrupa fotos por convidado (somente quem tiver foto em bingo)
   const groupedPhotos = photos.reduce((acc, photo) => {
     if (photo.categoria) {
       if (!acc[photo.nome]) acc[photo.nome] = [];
@@ -132,7 +114,7 @@ export default function Home() {
   }, {});
 
   // Fotos avulsas (sem categoria)
-  const avulsas = photos.filter(photo => !photo.categoria);
+  const freePhotos = photos.filter(photo => !photo.categoria);
 
   return (
     <>
@@ -166,10 +148,8 @@ export default function Home() {
           const userPhotos = groupedPhotos[nome];
           return (
             <div key={nome} style={{ marginBottom: "40px" }}>
-              <h3 style={{ textAlign: "left", marginBottom: "10px" }}>
-                {nome} {admin && <button onClick={() => handleDeleteGroup(nome)} style={{ marginLeft: "10px", color:"#fff", background:"#ff4444", border:"none", borderRadius:"6px", padding:"4px 8px", cursor:"pointer" }}>Apagar Grupo</button>}
-              </h3>
-              
+              <h3 style={{ textAlign: "left", marginBottom: "10px" }}>{nome}</h3>
+
               <div className="bingo-grid">
                 {bingoItems.map((item, idx) => {
                   const photo = userPhotos.find(p => p.categoria === item);
@@ -177,15 +157,32 @@ export default function Home() {
                     <div
                       key={idx}
                       className="bingo-item"
-                      style={{ cursor: photo ? "pointer" : "default" }}
                       onClick={() => photo && openModal(photo, item)}
                     >
-                      {!photo && item}
-                      {photo && <img src={photo.base64} alt={photo.nome} />}
-                      {admin && photo && <button
-                        style={{ position:"absolute", top:"5px", right:"5px", background:"#ff4444", color:"#fff", border:"none", borderRadius:"6px", padding:"4px 6px", cursor:"pointer", fontSize:"0.7rem" }}
-                        onClick={(e)=>{ e.stopPropagation(); handleDelete(photo.id); }}
-                      >Apagar</button>}
+                      {photo ? (
+                        <img src={photo.base64} alt={item} />
+                      ) : (
+                        <span>{item}</span>
+                      )}
+                      {admin && photo && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleDelete(photo.id); }}
+                          style={{
+                            position: "absolute",
+                            top: "5px",
+                            right: "5px",
+                            backgroundColor: "#ff4444",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "6px",
+                            padding: "2px 6px",
+                            cursor: "pointer",
+                            fontSize: "0.7rem",
+                          }}
+                        >
+                          Apagar
+                        </button>
+                      )}
                     </div>
                   );
                 })}
@@ -194,22 +191,36 @@ export default function Home() {
           );
         })}
 
-        {/* Fotos avulsas */}
-        {avulsas.length > 0 && (
-          <div style={{ marginTop:"40px" }}>
-            <h3>Fotos avulsas</h3>
+        {freePhotos.length > 0 && (
+          <>
+            <h3>Fotos Avulsas</h3>
             <div className="gallery">
-              {avulsas.map(photo => (
+              {freePhotos.map(photo => (
                 <div key={photo.id}>
-                  <img src={photo.base64} alt={photo.nome} onClick={()=>openModal(photo,"")} />
-                  {admin && <button
-                    style={{ position:"absolute", top:"5px", right:"5px", background:"#ff4444", color:"#fff", border:"none", borderRadius:"6px", padding:"4px 6px", cursor:"pointer", fontSize:"0.7rem" }}
-                    onClick={() => handleDelete(photo.id)}
-                  >Apagar</button>}
+                  <img src={photo.base64} alt={`Foto de ${photo.nome}`} onClick={() => openModal(photo, "")}/>
+                  {admin && (
+                    <button
+                      style={{
+                        position: "absolute",
+                        top: "5px",
+                        right: "5px",
+                        backgroundColor: "#ff4444",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "6px",
+                        padding: "4px 8px",
+                        cursor: "pointer",
+                        fontSize: "0.8rem",
+                      }}
+                      onClick={() => handleDelete(photo.id)}
+                    >
+                      Apagar
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
-          </div>
+          </>
         )}
 
         {loading && <p>Carregando fotos...</p>}

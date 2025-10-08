@@ -145,17 +145,17 @@ footer {
 /* Bingo Grid */
 .bingo-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(6, 1fr);
   gap: 10px;
   margin-bottom: 30px;
 }
 
 .bingo-item {
   position: relative;
-  background-color: #ffe6f0;
+  background-color: #ffe6f0; /* cor dos quadrados vazios */
   border: 2px dashed #ff00aa;
   border-radius: 8px;
-  aspect-ratio: 4/3; /* proporção parecida com foto padrão */
+  aspect-ratio: 3/4; /* vertical: altura maior que largura */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -179,3 +179,4 @@ footer {
   object-fit: cover;
   border-radius: 8px;
 }
+
