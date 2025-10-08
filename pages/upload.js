@@ -66,7 +66,7 @@ export default function Upload() {
         createdAt: serverTimestamp(),
         nome,
         comentario,
-        bingo: categoria || null // categoria opcional
+        categoria: categoria || null // permite foto sem categoria
       });
       alert("Foto enviada com sucesso!");
       setFile(null);
@@ -99,7 +99,7 @@ export default function Upload() {
           onChange={(e) => setCategoria(e.target.value)}
           style={{ marginBottom: "10px", padding: "8px", width: "100%", borderRadius: "6px", border: "1px solid #ccc" }}
         >
-          <option value="">Sem categoria (foto livre)</option>
+          <option value="">Nenhuma categoria (foto avulsa)</option>
           {bingoCategorias.map((cat) => (
             <option key={cat} value={cat}>{cat}</option>
           ))}
@@ -107,7 +107,7 @@ export default function Upload() {
 
         <input
           type="text"
-          placeholder="Faça um comentário na sua foto (opcional)"
+          placeholder="Comentário opcional"
           value={comentario}
           onChange={(e) => setComentario(e.target.value)}
           style={{ marginBottom: "10px", padding: "8px", width: "100%", borderRadius: "6px", border: "1px solid #ccc" }}
