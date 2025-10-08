@@ -35,15 +35,45 @@ const resizeImage = (file, maxWidth = 1024, maxHeight = 1024) => {
 export default function Upload() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [nome, setNome] = useState("");
+  const [comentario, setComentario] = useState("");
+  const [categoria, setCategoria] = useState("");
+
+  const bingoCategorias = [
+    "Foto sorrindo",
+    "Foto dos noivos",
+    "Foto dançando",
+    "Foto do seu look",
+    "Fim de festa",
+    "Saída dos noivos",
+    "Foto com drink",
+    "Foto da cerimônia",
+    "Foto com amigos",
+    "Foto do sorteio",
+    "Foto brindando",
+    "Foto da decoração",
+  ];
 
   const handleUpload = async () => {
     if (!file) return alert("Escolha um arquivo primeiro!");
+    if (!nome) return alert("Digite seu nome!");
+    if (!categoria) return alert("Selecione a categoria do bingo!");
+
     setLoading(true);
     try {
       const base64 = await resizeImage(file);
-      await addDoc(collection(db, "fotos"), { base64, createdAt: serverTimestamp() });
+      await addDoc(collection(db, "fotos"), {
+        base64,
+        createdAt: serverTimestamp(),
+        nome,
+        comentario,
+        categoria
+      });
       alert("Foto enviada com sucesso!");
       setFile(null);
+      setNome("");
+      setComentario("");
+      setCategoria("");
     } catch (err) {
       console.error("Erro ao enviar a foto:", err);
       alert("Erro ao enviar a foto.");
@@ -56,6 +86,33 @@ export default function Upload() {
       <Header />
       <div className="container">
         <h2>Envie sua Foto</h2>
+
+        <input
+          type="text"
+          placeholder="Digite seu nome"
+          value={nome}
+          onChange={(e) => setNome(e.target.value)}
+          style={{ marginBottom: "10px", padding: "8px", width: "100%", borderRadius: "6px", border: "1px solid #ccc" }}
+        />
+
+        <select
+          value={categoria}
+          onChange={(e) => setCategoria(e.target.value)}
+          style={{ marginBottom: "10px", padding: "8px", width: "100%", borderRadius: "6px", border: "1px solid #ccc" }}
+        >
+          <option value="">Selecione a categoria do bingo</option>
+          {bingoCategorias.map((cat) => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+
+        <input
+          type="text"
+          placeholder="Faça um comentário na sua foto (opcional)"
+          value={comentario}
+          onChange={(e) => setComentario(e.target.value)}
+          style={{ marginBottom: "10px", padding: "8px", width: "100%", borderRadius: "6px", border: "1px solid #ccc" }}
+        />
 
         <div style={{ display: "flex", justifyContent: "center", gap: "10px", flexWrap: "wrap" }}>
           <label className="button button-blue">

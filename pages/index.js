@@ -1,25 +1,88 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { db } from "../firebase";
-import { collection, query, orderBy, getDocs, doc, deleteDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  orderBy,
+  getDocs,
+  doc,
+  deleteDoc,
+  limit,
+  startAfter
+} from "firebase/firestore";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
 export default function Home() {
   const [photos, setPhotos] = useState([]);
+  const [lastDoc, setLastDoc] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [modalPhoto, setModalPhoto] = useState(null);
+  const [modalComentario, setModalComentario] = useState("");
+  const [modalNome, setModalNome] = useState("");
+  const [modalBingo, setModalBingo] = useState("");
   const [admin, setAdmin] = useState(false);
+  const PHOTOS_PER_PAGE = 50;
+  const ADMIN_PASSWORD = "casamento123";
+  const containerRef = useRef();
 
-  const ADMIN_PASSWORD = "casamento123"; // coloque sua senha aqui
+  const bingoItems = [
+    "Foto sorrindo",
+    "Foto dos noivos",
+    "Foto dançando",
+    "Foto do seu look",
+    "Fim de festa",
+    "Saída dos noivos",
+    "Foto com drink",
+    "Foto da cerimônia",
+    "Foto com amigos",
+    "Foto do sorteio",
+    "Foto brindando",
+    "Foto da decoração"
+  ];
+
+  const fetchPhotos = async (loadMore = false) => {
+    setLoading(true);
+    let q;
+    if (loadMore && lastDoc) {
+      q = query(
+        collection(db, "fotos"),
+        orderBy("createdAt", "desc"),
+        startAfter(lastDoc),
+        limit(PHOTOS_PER_PAGE)
+      );
+    } else {
+      q = query(
+        collection(db, "fotos"),
+        orderBy("createdAt", "desc"),
+        limit(PHOTOS_PER_PAGE)
+      );
+    }
+
+    const snapshot = await getDocs(q);
+    const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setPhotos(loadMore ? [...photos, ...list] : list);
+    setLastDoc(snapshot.docs[snapshot.docs.length - 1] || null);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const fetchPhotos = async () => {
-      const q = query(collection(db, "fotos"), orderBy("createdAt", "desc"));
-      const snapshot = await getDocs(q);
-      const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setPhotos(list);
-    };
     fetchPhotos();
   }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - 200 &&
+        !loading &&
+        lastDoc
+      ) {
+        fetchPhotos(true);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loading, lastDoc, photos]);
 
   const handleDelete = async (id) => {
     if (!confirm("Deseja realmente apagar esta foto?")) return;
@@ -34,11 +97,23 @@ export default function Home() {
     }
   };
 
+  const openModal = (photo, bingoName) => {
+    setModalPhoto(photo.base64);
+    setModalNome(photo.nome);
+    setModalComentario(photo.comentario || "");
+    setModalBingo(bingoName);
+  };
+
+  const groupedPhotos = photos.reduce((acc, photo) => {
+    if (!acc[photo.nome]) acc[photo.nome] = [];
+    acc[photo.nome].push(photo);
+    return acc;
+  }, {});
+
   return (
     <>
       <Header />
 
-      {/* Clique secreto para admin */}
       {!admin && (
         <div
           style={{
@@ -48,7 +123,7 @@ export default function Home() {
             width: "20px",
             height: "20px",
             cursor: "pointer",
-            opacity: 0.2, // quase invisível
+            opacity: 0.2,
             zIndex: 1001,
           }}
           onClick={() => {
@@ -59,44 +134,75 @@ export default function Home() {
         ></div>
       )}
 
-      <div className="container">
-        <h2>Galeria de Fotos</h2>
+      <div className="container" ref={containerRef}>
+        <h2>Galeria Bingo de Fotos</h2>
         {photos.length === 0 && <p>Nenhuma foto enviada ainda!</p>}
 
-        <div className="gallery">
-          {photos.map((photo) => (
-            <div key={photo.id} style={{ position: "relative" }}>
-              <img
-                src={photo.base64}
-                alt="Foto do casamento"
-                onClick={() => setModalPhoto(photo.base64)}
-                style={{ cursor: "pointer" }}
-              />
-              {admin && (
-                <button
-                  style={{
-                    position: "absolute",
-                    top: "5px",
-                    right: "5px",
-                    backgroundColor: "#ff4444",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "6px",
-                    padding: "4px 8px",
-                    cursor: "pointer",
-                    fontSize: "0.8rem",
-                  }}
-                  onClick={() => handleDelete(photo.id)}
-                >
-                  Apagar
-                </button>
-              )}
+        {Object.keys(groupedPhotos).map((nome) => {
+          const userPhotos = groupedPhotos[nome];
+          return (
+            <div key={nome} style={{ marginBottom: "40px" }}>
+              <h3 style={{ textAlign: "left", marginBottom: "10px" }}>{nome}</h3>
+              
+              <div className="bingo-grid" style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(6, 1fr)",
+                gap: "10px",
+                marginBottom: "10px"
+              }}>
+                {bingoItems.slice(0,6).map((item, idx) => {
+                  const photo = userPhotos.find(p => p.bingo === item);
+                  return (
+                    <div key={idx} style={{
+                      height: "120px",
+                      border: "2px dashed #ccc",
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: photo ? "#f0f0f0" : "#fff",
+                      cursor: photo ? "pointer" : "default"
+                    }}
+                    onClick={() => photo && openModal(photo, item)}
+                    >
+                      {!photo && <span style={{ textAlign: "center", fontSize: "0.9rem" }}>{item}</span>}
+                    </div>
+                  )
+                })}
+              </div>
+
+              <div className="bingo-grid" style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(6, 1fr)",
+                gap: "10px"
+              }}>
+                {bingoItems.slice(6,12).map((item, idx) => {
+                  const photo = userPhotos.find(p => p.bingo === item);
+                  return (
+                    <div key={idx} style={{
+                      height: "120px",
+                      border: "2px dashed #ccc",
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: photo ? "#f0f0f0" : "#fff",
+                      cursor: photo ? "pointer" : "default"
+                    }}
+                    onClick={() => photo && openModal(photo, item)}
+                    >
+                      {!photo && <span style={{ textAlign: "center", fontSize: "0.9rem" }}>{item}</span>}
+                    </div>
+                  )
+                })}
+              </div>
             </div>
-          ))}
-        </div>
+          )
+        })}
+
+        {loading && <p>Carregando fotos...</p>}
       </div>
 
-      {/* Modal para mostrar foto grande */}
       {modalPhoto && (
         <div
           style={{
@@ -104,9 +210,11 @@ export default function Home() {
             top: 0, left: 0, right: 0, bottom: 0,
             backgroundColor: "rgba(0,0,0,0.8)",
             display: "flex",
+            flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
             zIndex: 1000,
+            color: "#fff",
           }}
           onClick={() => setModalPhoto(null)}
         >
@@ -114,12 +222,16 @@ export default function Home() {
             src={modalPhoto}
             alt="Foto grande"
             style={{
-              maxHeight: "90%",
+              maxHeight: "70%",
               maxWidth: "90%",
               borderRadius: "12px",
               boxShadow: "0 8px 20px rgba(0,0,0,0.5)"
             }}
           />
+          <p style={{ marginTop: "10px", fontSize: "1.1rem" }}>
+            <strong>{modalNome}</strong> - {modalBingo}
+          </p>
+          {modalComentario && <p style={{ fontStyle: "italic" }}>{modalComentario}</p>}
         </div>
       )}
 
