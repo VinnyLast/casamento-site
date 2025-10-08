@@ -153,14 +153,14 @@ footer {
 .bingo-item {
   position: relative;
   background-color: #ffe6f0; /* cor dos quadrados vazios */
-  border: 2px dashed #ff00aa;
+  border: 2px dashed #303030;
   border-radius: 8px;
   aspect-ratio: 3/4; /* vertical: altura maior que largura */
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  color: #ff00aa;
+  color: #333333;
   font-size: 0.9rem;
   text-align: center;
   overflow: hidden;
